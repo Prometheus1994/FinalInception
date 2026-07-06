@@ -1,0 +1,58 @@
+services:
+  mariadb:
+    image: mariadb
+    build: ./requirements/mariadb
+    env_file:
+      - .env
+    secrets:
+      - db_password
+      - db_root_password
+    volumes:
+      - mariadb_data:/var/lib/mysql
+    networks:
+      - inception
+
+  wordpress:
+    image: wordpress
+    build: ./requirements/wordpress
+    env_file:
+      - .env
+    depends_on:
+      - mariadb
+    volumes:
+      - wordpress_data:/var/www/html
+    secrets:
+      - db_password
+      - credentials
+    networks:
+      - inception
+
+  nginx:
+    image: nginx
+    build: ./requirements/nginx
+    env_file:
+      - .env
+    depends_on:
+      - wordpress
+    ports:
+      - "443:443"
+    volumes:
+      - wordpress_data:/var/www/html
+    networks:
+      - inception
+
+secrets:
+  db_password:
+    file: ../secrets/db_password.txt
+  db_root_password:
+    file: ../secrets/db_root_password.txt
+  credentials:
+    file: ../secrets/credentials.txt
+
+volumes:
+  mariadb_data:
+  wordpress_data:
+
+networks:
+  inception:
+    driver: bridge

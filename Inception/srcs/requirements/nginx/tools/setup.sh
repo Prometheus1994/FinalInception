@@ -1,0 +1,18 @@
+#!/bin/bash
+
+set -e
+# if any command failed stop script
+
+mkdir -p /etc/nginx/ssl
+
+openssl req \
+	-x509 \
+	-nodes \
+	-days 365 \
+	-newkey rsa:2048 \
+	-keyout /etc/nginx/ssl/inception.key \
+	-out /etc/nginx/ssl/inception.crt \
+	-subj "/C=MA/ST=Casablanca/L=Casablanca/O=42/OU=1337/CN=$DOMAIN_NAME"
+
+exec nginx -g "daemon off;"
+# stay attached to the terminal and make nginx PID=1
